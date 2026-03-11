@@ -6,7 +6,7 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,ttf,json
 version = 1.0.0
 
-# المتطلبات الأساسية للتشغيل
+# المتطلبات الأساسية (مهمة جداً)
 requirements = python3,kivy,pillow,arabic-reshaper,python-bidi
 
 orientation = portrait
@@ -14,7 +14,6 @@ fullscreen = 1
 android.archs = arm64-v8a, armeabi-v7a
 android.permissions = READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE
 
-# إعدادات النظام
 android.api = 31
 android.minapi = 21
 android.ndk = 25b
