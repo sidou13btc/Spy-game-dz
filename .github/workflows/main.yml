@@ -15,23 +15,24 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Install Dependencies
+      - name: Install System Dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential libsqlite3-dev sqlite3 bzip2 libbz2-dev zlib1g-dev libssl-dev openssl libgdbm-dev libgdbm-compat-dev liblzma-dev libreadline-dev libncursesw5-dev libffi-dev uuid-dev readline-common libgmp-dev libmpfr-dev libmpc-dev libtool autoconf automake
           pip install --upgrade pip
           pip install buildozer cython==0.29.33 pillow arabic-reshaper python-bidi
 
-      - name: Build APK
+      - name: Clean and Build APK
         run: |
-          # تنظيف كامل للمحاولات الفاشلة السابقة
+          # حذف أي مجلدات قديمة تسبب تعارض في المسارات (حل مشكلة FileNotFoundError)
+          rm -rf .buildozer/
+          # بدء البناء من بيئة نظيفة تماماً
           buildozer android clean
-          # بدء البناء
           yes | buildozer -v android debug
         shell: bash
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: SpyGame-Final
+          name: SpyGame-Final-APK
           path: bin/*.apk
