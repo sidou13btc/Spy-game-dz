@@ -7,22 +7,31 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest # السيرفر الأسرع حالياً
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 11
+      - name: Set up JDK 17 # التحديث لـ 17 يتناسب مع السيرفر الجديد ويقلل وقت التعارض
         uses: actions/setup-java@v3
         with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'temurin'
 
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.9'
+
+      # --- ميزة السرعة القصوى: التخزين المؤقت ---
+      - name: Cache Buildozer dependencies
+        uses: actions/cache@v3
+        with:
+          path: .buildozer
+          key: ${{ runner.os }}-buildozer-${{ hashFiles('buildozer.spec') }}
+          restore-keys: |
+            ${{ runner.os }}-buildozer-
 
       - name: Install System Dependencies
         run: |
@@ -36,14 +45,13 @@ jobs:
 
       - name: Build APK
         run: |
-          rm -rf .buildozer/
-          # 'yes |' تجيب بنعم على كل تراخيص أندرويد تلقائياً
+          # لم نحذف المجلدات هنا لنستفيد من الـ Cache في المرات القادمة
           yes | buildozer -v android debug
         env:
           APP_ANDROID_ACCEPT_SDK_LICENSE: "1"
 
-      - name: Upload APK Artifact
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: SpyGame-Build
+          name: SpyGame-Final-APK
           path: bin/*.apk
