@@ -1,4 +1,5 @@
-name: Android Build
+name: Build Spy Game APK
+
 on:
   push:
     branches: [ main ]
@@ -7,32 +8,71 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
-          python-version: 3.9
+          python-version: '3.9'
 
       - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential libsqlite3-dev sqlite3 bzip2 libbz2-dev zlib1g-dev libssl-dev openssl libgdbm-dev libgdbm-compat-dev liblzma-dev libreadline-dev libncursesw5-dev libffi-dev uuid-dev readline-common libgmp-dev libmpfr-dev libmpc-dev libtool autoconf automake
+          sudo apt-get install -y \
+            build-essential \
+            git \
+            python3-dev \
+            ffmpeg \
+            libsdl2-dev \
+            libsdl2-image-dev \
+            libsdl2-mixer-dev \
+            libsdl2-ttf-dev \
+            libportmidi-dev \
+            libswscale-dev \
+            libavformat-dev \
+            libavcodec-dev \
+            zlib1g-dev \
+            libgstreamer1.0 \
+            gstreamer1.0-plugins-base \
+            gstreamer1.0-plugins-good \
+            libsqlite3-dev \
+            sqlite3 \
+            bzip2 \
+            libbz2-dev \
+            libssl-dev \
+            openssl \
+            libgdbm-dev \
+            libncursesw5-dev \
+            libffi-dev \
+            unzip \
+            zip \
+            autoconf \
+            automake \
+            libtool \
+            pkg-config \
+            ant \
+            openjdk-17-jdk
+
+      - name: Install Buildozer and Cython
+        run: |
           pip install --upgrade pip
-          pip install buildozer cython==0.29.33 pillow arabic-reshaper python-bidi
+          pip install buildozer cython==0.29.33
 
       - name: Clean and Build APK
         run: |
-          # حذف أي مجلدات قديمة تسبب تعارض في المسارات (حل مشكلة FileNotFoundError)
+          # حذف المجلدات القديمة التي تسببت في خطأ FileNotFoundError
           rm -rf .buildozer/
-          # بدء البناء من بيئة نظيفة تماماً
-          buildozer android clean
-          yes | buildozer -v android debug
-        shell: bash
+          # تشغيل البناء مع تفعيل نمط التقرير المفصل لمعرفة أي خطأ فور وقوعه
+          buildozer -v android debug
+        env:
+          # هذا المتغير مهم لتجنب توقف البناء في بيئات العمل المؤتمتة
+          APP_ANDROID_ACCEPT_SDK_LICENSE: "1"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: SpyGame-Final-APK
+          name: SpyGame-APK
           path: bin/*.apk
