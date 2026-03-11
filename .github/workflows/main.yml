@@ -7,11 +7,17 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -21,58 +27,23 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            build-essential \
-            git \
-            python3-dev \
-            ffmpeg \
-            libsdl2-dev \
-            libsdl2-image-dev \
-            libsdl2-mixer-dev \
-            libsdl2-ttf-dev \
-            libportmidi-dev \
-            libswscale-dev \
-            libavformat-dev \
-            libavcodec-dev \
-            zlib1g-dev \
-            libgstreamer1.0 \
-            gstreamer1.0-plugins-base \
-            gstreamer1.0-plugins-good \
-            libsqlite3-dev \
-            sqlite3 \
-            bzip2 \
-            libbz2-dev \
-            libssl-dev \
-            openssl \
-            libgdbm-dev \
-            libncursesw5-dev \
-            libffi-dev \
-            unzip \
-            zip \
-            autoconf \
-            automake \
-            libtool \
-            pkg-config \
-            ant \
-            openjdk-17-jdk
+          sudo apt-get install -y build-essential git python3-dev ffmpeg libsdl2-dev libsdl2-image-dev libsdl2-mixer-dev libsdl2-ttf-dev libportmidi-dev libswscale-dev libavformat-dev libavcodec-dev zlib1g-dev libgstreamer1.0 gstreamer1.0-plugins-base gstreamer1.0-plugins-good libsqlite3-dev sqlite3 bzip2 libbz2-dev libssl-dev openssl libgdbm-dev libncursesw5-dev libffi-dev unzip zip autoconf automake libtool pkg-config libncurses5
 
       - name: Install Buildozer and Cython
         run: |
           pip install --upgrade pip
-          pip install buildozer cython==0.29.33
+          pip install "cython<3.0.0" buildozer
 
-      - name: Clean and Build APK
+      - name: Build APK
         run: |
-          # حذف المجلدات القديمة التي تسببت في خطأ FileNotFoundError
           rm -rf .buildozer/
-          # تشغيل البناء مع تفعيل نمط التقرير المفصل لمعرفة أي خطأ فور وقوعه
-          buildozer -v android debug
+          # 'yes |' تجيب بنعم على كل تراخيص أندرويد تلقائياً
+          yes | buildozer -v android debug
         env:
-          # هذا المتغير مهم لتجنب توقف البناء في بيئات العمل المؤتمتة
           APP_ANDROID_ACCEPT_SDK_LICENSE: "1"
 
-      - name: Upload APK
+      - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: SpyGame-APK
+          name: SpyGame-Build
           path: bin/*.apk
